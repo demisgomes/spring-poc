@@ -1,7 +1,9 @@
 package com.concrete.spring.validation;
 
 import com.concrete.spring.domain.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserValidation {
     public boolean validate(User user){
         if(user!=null){
