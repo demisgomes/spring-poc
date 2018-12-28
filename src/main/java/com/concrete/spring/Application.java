@@ -19,8 +19,8 @@ public class Application implements CommandLineRunner {
 	//@Autowired
 	//private UserRepository userRepository;
 
-	@Autowired
-	private UserDAO userDAO;
+	//@Autowired
+	//private UserDAO userDAO;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -31,7 +31,7 @@ public class Application implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		//UserDAO userDAO=new UserDAO(userRepository);
-		userDAO.createSingleUser();
+		//userDAO.createSingleUser();
 	}
 }
 

@@ -6,4 +6,9 @@ public class InsertException extends Exception {
         super.printStackTrace();
     }
 
+    public InsertException(String message){
+        super(message);
+        super.printStackTrace();
+    }
+
 }

@@ -4,6 +4,7 @@ import com.concrete.spring.domain.Phone;
 import com.concrete.spring.domain.User;
 import com.concrete.spring.domain.UserRepository;
 import com.concrete.spring.exception.*;
+import com.concrete.spring.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +16,13 @@ public class UserDAO {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    UserValidation userValidation;
+
     /**
      * Method for populate the database with a single user
      */
-    public void createSingleUser(){
+    public User createSingleUser(){
         //tesing a user with two phones
         User user1=new User();
 
@@ -39,10 +43,17 @@ public class UserDAO {
         user1.setName("demis");
         user1.setEmail("demis@concrete.com");
         user1.setPassword("password");
-        userRepository.save(user1);
+        try {
+            createUser(user1);
+        } catch (InsertException e) {
+            e.printStackTrace();
+        } catch (EmailAlreadyExistsException e){
+            e.printStackTrace();
+        }
 
         Optional<User> optionalUser=userRepository.findById(1);
         System.out.println(optionalUser.toString());
+        return optionalUser.get();
     }
 
 
@@ -94,23 +105,42 @@ public class UserDAO {
      * @param user the user without Date info
      * @return a user with created, modified, last login, and token info fulfilled
      */
-    public User createUser(User user) throws InsertException{
-        Date date = new Date();
-        date.setTime(Calendar.getInstance().getTimeInMillis());
-        user.setCreated(date);
-        user.setModified(date);
-        user.setLastLogin(date);
-        user.setToken(UUID.randomUUID().toString());
+    public User createUser(User user) throws InsertException, EmailAlreadyExistsException{
+        if(userValidation.validate(user)){
 
-        return save(user);
+            try{
+                emailExists(user.getEmail());
+                Date date = new Date();
+                date.setTime(Calendar.getInstance().getTimeInMillis());
+                user.setCreated(date);
+                user.setModified(date);
+                user.setLastLogin(date);
+                user.setToken(UUID.randomUUID().toString());
+
+                return save(user);
+            }
+
+            catch (EmailAlreadyExistsException e){
+                throw new EmailAlreadyExistsException();
+            }
+        }
+        else{
+            throw new InsertException("One or more fields from user were do not filled correctly");
+        }
+
     }
 
     public User signInUser(User user) throws InsertException{
-        Date date = new Date();
-        date.setTime(Calendar.getInstance().getTimeInMillis());
-        user.setLastLogin(date);
+        if(userValidation.validateLogin(user)){
+            Date date = new Date();
+            date.setTime(Calendar.getInstance().getTimeInMillis());
+            user.setLastLogin(date);
 
-        return save(user);
+            return save(user);
+        }
+        else{
+            throw new InsertException("One or more fields from user were do not filled correctly");
+        }
     }
 
     public User save(User user) throws InsertException {
